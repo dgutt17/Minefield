@@ -1,0 +1,157 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Dan's Game!</title>
+        <script src="//cdn.jsdelivr.net/phaser/2.6.2/phaser.min.js"></script>
+        <script src="gameState.js"></script>
+    </head>
+    <body>
+    <script type="text/javascript">
+        var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+
+
+var laser;
+var player;
+var nextFire = 0;
+var fireRate = 200
+var lastDirection;
+function preload() {
+
+    // game.load.image('sky', 'assets/sky.png');
+    // game.load.image('star', 'assets/star.png');
+    game.load.spritesheet('starShip2', 'assets/starShipAnimation3.png', 107, 49);
+    game.load.image('asteroid', 'assets/asteroid3.png')
+    game.load.image('laser', 'assets/spriteLaser2.png')
+}
+
+
+
+
+
+function create() {
+    // game.world.setBounds(0,0, 2000, 2000)
+    // game.add.sprite(0, 0, 'sky');
+    player = game.add.sprite(32, game.world.height - 150, 'starShip2');
+    asteroid = game.add.sprite(500, game.world.height - 300, 'asteroid')
+    laser = game.add.group()
+    laser.enableBody = true
+
+    game.physics.arcade.enable(player);
+    game.physics.arcade.enable(asteroid)
+    laser.physicsBodyType = Phaser.Physics.ARCADE
+    laser.createMultiple(5000, 'laser')
+
+
+    player.animations.add('left', [1], 10, true);
+    player.animations.add('right', [3], 10, true);
+    player.animations.add('up', [0], 10, true);
+    player.animations.add('down', [2], 10, true);
+
+
+    // player.body.collideWorldBounds = true;
+
+    // game.camera.follow(player)
+    // game.camera.deadzone = new Phaser.Rectangle(400, 0,400, 400 )
+
+
+    cursors = game.input.keyboard.createCursorKeys();
+    fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+
+
+
+
+
+
+}
+
+function update() {
+    player.body.velocity.x = 0;
+    player.body.velocity.y = 0;
+
+    asteroid.body.velocity.x = -10
+    asteroid.body.velocity.y = 0
+
+    // game.physics.arcade.collide(laser, asteroid);
+
+
+
+
+
+    if(fireButton.isDown){
+        fireLaser()
+    }
+    if (cursors.left.isDown)
+    {
+        //  Move to the left
+        player.body.velocity.x = -350;
+        player.animations.play('left');
+        // lastDirection = 'left'
+    }
+    if (cursors.right.isDown)
+    {
+        //  Move to the right
+        player.body.velocity.x = 350;
+
+        player.animations.play('right');
+        // lastDirection = 'right'
+
+    }
+    if (cursors.up.isDown)
+    {
+        player.body.velocity.y = -350;
+        player.animations.play('up');
+
+        lastDirection = 'up'
+
+
+
+    }
+    if (cursors.down.isDown){
+        player.body.velocity.y = 350;
+        player.animations.play('down');
+        lastDirection = 'down'
+
+    }
+    else
+    {
+        //  Stand still
+        player.animations.stop();
+
+    }
+    game.physics.arcade.overlap(player, asteroid, asteroidHitsPlayer, null, this);
+    game.physics.arcade.overlap(laser, asteroid, laserHitsAsteroid, null, this);
+
+
+    
+}
+
+function asteroidHitsPlayer(player, asteroid){
+    player.kill()
+    player.reset(400, game.world.height - 150)
+}
+
+function laserHitsAsteroid(laser, asteroid){
+    laser.kill()
+    asteroid.kill()
+}
+
+function fireLaser (){
+    if(game.time.now > nextFire){
+        nextFire = game.time.now + fireRate
+        var laser2 = laser.getFirstDead()
+        if(laser2){
+                laser2.reset(player.x + 15, player.y - 50);
+                laser2.body.velocity.y = -400;
+                // laser2.reset(player.x + 15, player.y - 50);
+                // laser2.body.velocity.x = -400;
+                // laser2.angle = 90
+            }
+
+        }
+    }
+
+
+    </script>
+    </body>
+</html>
