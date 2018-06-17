@@ -90,14 +90,14 @@ function update() {
 
 
 
-    if(!lives){
-        window.alert('You ran out of lives!')
+    if(lives <= 0){
         window.location.reload();
+        window.alert('You ran out of lives!')
     }
 
     if(points === 25) {
-        window.alert('You won!')
         window.location.reload();
+        window.alert('You won!')
     }
 
 
