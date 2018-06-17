@@ -4,7 +4,6 @@
         <meta charset="UTF-8" />
         <title>Dan's Game!</title>
         <script src="//cdn.jsdelivr.net/phaser/2.6.2/phaser.min.js"></script>
-        <script src="gameState.js"></script>
     </head>
     <body>
     <script type="text/javascript">
@@ -24,10 +23,9 @@
         var velocity;
         var coord;
         var pointer;
+        var scoreText;
+        var asteroidNum;
 function preload() {
-
-    // game.load.image('sky', 'assets/sky.png');
-    // game.load.image('star', 'assets/star.png');
     game.load.spritesheet('starShip2', 'assets/starShipAnimation3.png', 107, 49);
     game.load.image('asteroid', 'assets/asteroid3.png')
     game.load.image('laser', 'assets/spriteLaser2.png')
@@ -39,19 +37,15 @@ function preload() {
 
 
 function create() {
-    // game.add.sprite(0, 0, 'sky');
-    // text = game.add.text(0, 0, `lives: ${lives}`, {font: '20px Arial', fill: 'white', align: 'center'})
     game.world.setBounds(0, 0, 3200, 800)
     background = game.add.sprite(0, 0, 'stars')
     player = game.add.sprite(1600, game.world.height - 400, 'starShip2');
-    // asteroid = game.add.sprite(500, game.world.height - 300, 'asteroid')
     asteroid = game.add.group()
     asteroid.enableBody = true
     laser = game.add.group()
     laser.enableBody = true
 
     game.physics.arcade.enable(player);
-    // game.physics.arcade.enable(asteroid)
     asteroid.physicsBodyType = Phaser.Physics.ARCADE
     laser.physicsBodyType = Phaser.Physics.ARCADE
     laser.createMultiple(5000, 'laser')
@@ -68,37 +62,28 @@ function create() {
     player.body.collideWorldBounds = true;
     asteroid.collideWorldBounds = true;
 
+
     cursors = game.input.keyboard.createCursorKeys();
     fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     accelRight = game.input.keyboard.addKey(Phaser.Keyboard.D);
     accelLeft = game.input.keyboard.addKey(Phaser.Keyboard.S);
-
+    
     for(var x = 0; x < 5; x++){
         for(var y = 0; y < 5; y++){
             asteroid.create(game.world.randomX, game.world.randomY, 'asteroid')
-
+            
         }
     }
-
-
-
-
-
-
+    
+    asteroidNum = asteroid.length
+    scoreText = game.add.text(16, 16, `Mines Left: ${asteroidNum}      Lives Left: ${lives}`, { fontSize: '32px', fill: '#008000' });
+    scoreText.fixedToCamera = true
 
 }
 
 function update() {
-    // player.body.velocity.x = 0;
-    // player.body.velocity.y = 0;
 
-    // asteroid.forEach( elem => game.physics.arcade.moveToObject(elem,player, 100))
-
-    
-
-    // asteroid.x += Math.sin(1)
-    // asteroid.y += 1
-
+    asteroid.forEach( elem => game.physics.arcade.moveToObject(elem,player, 100))
     player.body.acceleration.x = 0;
     player.body.acceleration.y = 0;
 
@@ -117,7 +102,6 @@ function update() {
 
 
     if(fireButton.isDown){
-        console.log('lastDirection in fire conditional: ', lastDirection)
         fireLaser(lastDirection, velocity, coord, pointer)
     }
     if (cursors.left.isDown)
@@ -160,38 +144,28 @@ function update() {
         coord = 'y'
         pointer = {x: 52, y: -10}
     }
-    // if(accelRight.isDown){
-    //     player.body.acceleration.x = 350;
-
-    //     player.animations.play('right');
-    // }
-    // if(accelLeft.isDown){
-    //     player.body.acceleration.x = -350;
-    //     player.animations.play('left');
-    // }
     else
     {
-        //  Stand still
         player.animations.stop();
 
     }
     game.physics.arcade.overlap(player, asteroid, asteroidHitsPlayer, null, this);
-    game.physics.arcade.overlap(laser, asteroid, laserHitsAsteroid, null, this);
-
-
-    
+    game.physics.arcade.overlap(laser, asteroid, laserHitsAsteroid, null, this) 
 }
 
 function asteroidHitsPlayer(player, asteroid){
     player.kill()
-    lives -= 1
     player.reset(400, game.world.height - 150)
+    lives = lives - 1
+    scoreText.text = `Mines Left: ${asteroidNum}      Lives Left: ${lives}`
 }
 
 function laserHitsAsteroid(laser, asteroid){
     laser.kill()
     asteroid.kill()
     points++
+    asteroidNum--
+    scoreText.text = `Mines Left: ${asteroidNum}      Lives Left: ${lives}`
 }
 
 function fireLaser (angle, velocity, coord, pointer){
@@ -199,31 +173,21 @@ function fireLaser (angle, velocity, coord, pointer){
         nextFire = game.time.now + fireRate
         var laser2 = laser.getFirstDead()
         if(laser2 && coord === 'y'){
-            console.log('angle in fireLaser: ', angle)
                 laser2.reset(player.x + pointer.x, player.y + pointer.y);
                 laser2.body.velocity.y = velocity;
-                console.log('laser2.body.angle: ', laser2.angle)
                 laser2.angle = angle
-                console.log('laser2.body.angle: ', laser2.angle)
                 // laser2.reset(player.x + 15, player.y - 50);
                 // laser2.body.velocity.x = -400;
                 // laser2.angle = 90
         }
         else if(laser2 && coord === 'x'){
-            console.log('angle in fireLaser: ', angle)
                 laser2.reset(player.x + pointer.x, player.y + pointer.y);
                 laser2.body.velocity.x = velocity;
-                console.log('laser2.body.angle: ', laser2.angle)
                 laser2.angle = angle
-                console.log('laser2.body.angle: ', laser2.angle)
         }
 
     }
 }
-
-
-
-
     </script>
     </body>
 </html>
